@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Medicine Reminder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.lordicon.com/lordicon.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>💊 Smart Medicine Reminder System</h1>
+
+    <!-- Set Dose Times Card -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">⏰ Set Dose Times</h2>
+      </div>
+
+      <table class="dose-times-table">
+        <thead>
+          <tr>
+            <th>Medicine</th>
+            <th>Before Meal</th>
+            <th>After Meal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="meal-label">🌅 Morning</span>
+            </td>
+            <td>
+              <div class="time-cell">
+                <div class="time-input-wrapper">
+                  <input type="time" id="morningBefore" class="form-input" placeholder="HH:MM">
+                  <button onclick="updateDoseTime('morning','before')" class="btn btn-icon btn-primary"
+                    title="Save"><lord-icon src="https://cdn.lordicon.com/cbtlerlm.json" trigger="hover" stroke="bold"
+                      style="width:20px;height:20px">
+                    </lord-icon></button>
+                  <button onclick="deleteDoseTime('morning','before')" class="btn btn-icon btn-danger"
+                    title="Delete"><lord-icon src="https://cdn.lordicon.com/sxhqklqh.json" trigger="hover" stroke="bold"
+                      colors="primary:#000000,secondary:#ffffff,tertiary:#646e78" style="width:20px;height:20px">
+                    </lord-icon></button>
+                </div>
+                <span class="form-helper">Before breakfast reminder</span>
+              </div>
+            </td>
+            <td>
+              <div class="time-cell">
+                <div class="time-input-wrapper">
+                  <input type="time" id="morningAfter" class="form-input" placeholder="HH:MM">
+                  <button onclick="updateDoseTime('morning','after')" class="btn btn-icon btn-primary"
+                    title="Save"><lord-icon src="https://cdn.lordicon.com/cbtlerlm.json" trigger="hover" stroke="bold"
+                      style="width:20px;height:20px">
+                    </lord-icon></button>
+                  <button onclick="deleteDoseTime('morning','after')" class="btn btn-icon btn-danger"
+                    title="Delete"><lord-icon src="https://cdn.lordicon.com/sxhqklqh.json" trigger="hover" stroke="bold"
+                      colors="primary:#000000,secondary:#ffffff,tertiary:#646e78" style="width:20px;height:20px">
+                    </lord-icon></button>
+                </div>
+                <span class="form-helper">After breakfast reminder</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="meal-label">☀️ Afternoon</span>
+            </td>
+            <td>
+              <div class="time-cell">
+                <div class="time-input-wrapper">
+                  <input type="time" id="afternoonBefore" class="form-input" placeholder="HH:MM">
+                  <button onclick="updateDoseTime('afternoon','before')" class="btn btn-icon btn-primary"
+                    title="Save"><lord-icon src="https://cdn.lordicon.com/cbtlerlm.json" trigger="hover" stroke="bold"
+                      style="width:20px;height:20px">
+                    </lord-icon></button>
+                  <button onclick="deleteDoseTime('afternoon','before')" class="btn btn-icon btn-danger"
+                    title="Delete"><lord-icon src="https://cdn.lordicon.com/sxhqklqh.json" trigger="hover" stroke="bold"
+                      colors="primary:#000000,secondary:#ffffff,tertiary:#646e78" style="width:20px;height:20px">
+                    </lord-icon></button>
+                </div>
+                <span class="form-helper">Before lunch reminder</span>
+              </div>
+            </td>
+            <td>
+              <div class="time-cell">
+                <div class="time-input-wrapper">
+                  <input type="time" id="afternoonAfter" class="form-input" placeholder="HH:MM">
+                  <button onclick="updateDoseTime('afternoon','after')" class="btn btn-icon btn-primary"
+                    title="Save"><lord-icon src="https://cdn.lordicon.com/cbtlerlm.json" trigger="hover" stroke="bold"
+                      style="width:20px;height:20px">
+                    </lord-icon></button>
+                  <button onclick="deleteDoseTime('afternoon','after')" class="btn btn-icon btn-danger"
+                    title="Delete"><lord-icon src="https://cdn.lordicon.com/sxhqklqh.json" trigger="hover" stroke="bold"
+                      colors="primary:#000000,secondary:#ffffff,tertiary:#646e78" style="width:20px;height:20px">
+                    </lord-icon></button>
+                </div>
+                <span class="form-helper">After lunch reminder</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="meal-label">🌙 Night</span>
+            </td>
+            <td>
+              <div class="time-cell">
+                <div class="time-input-wrapper">
+                  <input type="time" id="nightBefore" class="form-input" placeholder="HH:MM">
+                  <button onclick="updateDoseTime('night','before')" class="btn btn-icon btn-primary"
+                    title="Save"><lord-icon src="https://cdn.lordicon.com/cbtlerlm.json" trigger="hover" stroke="bold"
+                      style="width:20px;height:20px">
+                    </lord-icon></button>
+                  <button onclick="deleteDoseTime('night','before')" class="btn btn-icon btn-danger"
+                    title="Delete"><lord-icon src="https://cdn.lordicon.com/sxhqklqh.json" trigger="hover" stroke="bold"
+                      colors="primary:#000000,secondary:#ffffff,tertiary:#646e78" style="width:20px;height:20px">
+                    </lord-icon></button>
+                </div>
+                <span class="form-helper">Before dinner reminder</span>
+              </div>
+            </td>
+            <td>
+              <div class="time-cell">
+                <div class="time-input-wrapper">
+                  <input type="time" id="nightAfter" class="form-input" placeholder="HH:MM">
+                  <button onclick="updateDoseTime('night','after')" class="btn btn-icon btn-primary"
+                    title="Save"><lord-icon src="https://cdn.lordicon.com/cbtlerlm.json" trigger="hover" stroke="bold"
+                      style="width:20px;height:20px">
+                    </lord-icon></button>
+                  <button onclick="deleteDoseTime('night','after')" class="btn btn-icon btn-danger"
+                    title="Delete"><lord-icon src="https://cdn.lordicon.com/sxhqklqh.json" trigger="hover" stroke="bold"
+                      colors="primary:#000000,secondary:#ffffff,tertiary:#646e78" style="width:20px;height:20px">
+                    </lord-icon></button>
+                </div>
+                <span class="form-helper">After dinner reminder</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="repeat-controls">
+        <label for="repeatPreset"><strong>Repeat for:</strong></label>
+        <select id="repeatPreset" class="form-select">
+          <option value="0">Today only</option>
+          <option value="3">3 days</option>
+          <option value="7">7 days (1 week)</option>
+          <option value="14">14 days (2 weeks)</option>
+          <option value="30">30 days (1 month)</option>
+          <option value="90">90 days (3 months)</option>
+          <option value="custom">Custom…</option>
+        </select>
+
+        <span id="customRepeatControls" style="display: none;" class="custom-repeat-wrapper">
+          <input type="number" id="customRepeatNumber" class="form-input" min="1" max="365" value="7">
+          <select id="customRepeatUnit" class="form-select">
+            <option value="days">days</option>
+            <option value="weeks">weeks</option>
+            <option value="months">months</option>
+          </select>
+        </span>
+
+        <button onclick="saveDoseTimes()" class="btn btn-primary"><lord-icon
+            src="https://cdn.lordicon.com/vwzukuhn.json" trigger="hover" stroke="bold"
+            colors="primary:#000000,secondary:#e83a30,tertiary:#ffc738,quaternary:#ffffff"
+            style="width:25px;height:25px">
+          </lord-icon> Save Dose Times</button>
+      </div>
+    </section>
+
+    <!-- Dose History Card -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">📋 Dose History</h2>
+        <button id="toggleFilterButton" onclick="toggleFilterPanel()" class="btn btn-secondary"><lord-icon
+            src="https://cdn.lordicon.com/iuvnsegf.json" trigger="hover" stroke="bold"
+            colors="primary:#000000,secondary:#110a5c,tertiary:#30c9e8,quaternary:#a66037"
+            style="width:20px;height:20px">
+          </lord-icon> Filter</button>
+      </div>
+
+      <div id="filterPanel" class="filter-panel">
+        <div class="filter-section">
+          <label class="filter-label">Date Range</label>
+          <div class="date-range-inputs">
+            <input type="date" id="filterDateFrom" class="form-input">
+            <span>to</span>
+            <input type="date" id="filterDateTo" class="form-input">
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <label class="filter-label">Medicine</label>
+          <div class="filter-chips">
+            <label class="filter-chip">
+              <input type="checkbox" id="filterMealMorning" checked>
+              <span>🌅 Morning</span>
+            </label>
+            <label class="filter-chip">
+              <input type="checkbox" id="filterMealAfternoon" checked>
+              <span>☀️ Afternoon</span>
+            </label>
+            <label class="filter-chip">
+              <input type="checkbox" id="filterMealNight" checked>
+              <span>🌙 Night</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <label class="filter-label">Timing</label>
+          <div class="filter-chips">
+            <label class="filter-chip">
+              <input type="checkbox" id="filterTimingBefore" checked>
+              <span>🍽 Before meal</span>
+            </label>
+            <label class="filter-chip">
+              <input type="checkbox" id="filterTimingAfter" checked>
+              <span>🍛 After meal</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <label class="filter-label">Status</label>
+          <div class="filter-chips">
+            <label class="filter-chip">
+              <input type="checkbox" id="filterStatusTaken" checked>
+              <span>✅ Taken</span>
+            </label>
+            <label class="filter-chip">
+              <input type="checkbox" id="filterStatusMissed" checked>
+              <span>❌ Missed</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button onclick="applyFilters()" class="btn btn-primary"><lord-icon
+              src="https://cdn.lordicon.com/efxgwrkc.json" trigger="hover" colors="primary:#ffffff"
+              style="width:20px;height:20px">
+            </lord-icon> Apply Filters</button>
+          <button onclick="clearFilters()" class="btn btn-secondary"><lord-icon
+              src="https://cdn.lordicon.com/xyfswyxf.json" trigger="morph" state="morph-trash-full-to-empty"
+              style="width:20px;height:20px">
+            </lord-icon> Clear Filters</button>
+        </div>
+      </div>
+
+      <div class="history-table-wrapper">
+        <table id="logTable" class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Medicine</th>
+              <th>Scheduled</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="paginationContainer" class="pagination-container">
+        <div class="pagination-controls">
+          <label for="rowsPerPage" class="form-label" style="margin: 0; display: inline;">Rows per page:</label>
+          <select id="rowsPerPage" class="form-select" onchange="changeRowsPerPage()"
+            style="width: auto; display: inline-block;">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="pagination-controls">
+          <button id="prevPageButton" onclick="goToPrevPage()" class="btn btn-secondary">← Prev</button>
+          <span id="paginationInfo" class="pagination-info"></span>
+          <button id="nextPageButton" onclick="goToNextPage()" class="btn btn-secondary">Next →</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <!-- API Configuration - Update this after deploying backend to Render -->
+  <script>
+    // Set your Render backend URL here after deployment
+    // Format: https://your-backend.onrender.com
+    window.API_URL = window.API_URL || "http://localhost:5000";
+  </script>
+  <script src="script.js"></script>
+</body>
+
+</html>

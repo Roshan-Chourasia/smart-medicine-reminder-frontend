@@ -1,0 +1,648 @@
+/* ============================================
+   COLOR PALETTE & CSS VARIABLES
+   ============================================ */
+:root {
+  --black: #000000;
+  --prussian-blue: #14213d;
+  --orange: #fca311;
+  --alabaster-grey: #e5e5e5;
+  --white: #ffffff;
+  
+  /* Semantic colors */
+  --success-green: #10b981;
+  --error-red: #ef4444;
+  --warning-orange: #fca311;
+  --info-blue: #3b82f6;
+  
+  /* Backgrounds */
+  --bg-primary: #f7f9fc;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f5f9;
+  
+  /* Text */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  padding: var(--spacing-lg);
+  min-height: 100vh;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--prussian-blue);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--prussian-blue);
+  margin-bottom: var(--spacing-md);
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ============================================
+   LAYOUT CONTAINER
+   ============================================ */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* ============================================
+   CARD COMPONENT
+   ============================================ */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--alabaster-grey);
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--prussian-blue);
+  margin: 0;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--prussian-blue);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background-color: #1a2d4f;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: var(--alabaster-grey);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: #d4d4d4;
+}
+
+.btn-danger {
+  background-color: var(--error-red);
+  color: var(--white);
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-icon {
+  padding: 8px 12px;
+  min-width: auto;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ============================================
+   FORM CONTROLS
+   ============================================ */
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--alabaster-grey);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: inherit;
+  background-color: var(--white);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--prussian-blue);
+  box-shadow: 0 0 0 3px rgba(20, 33, 61, 0.1);
+}
+
+.form-input[type="time"] {
+  padding: 8px 10px;
+}
+
+.form-helper {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xs);
+}
+
+/* ============================================
+   DOSE TIMES TABLE
+   ============================================ */
+.dose-times-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--spacing-lg);
+}
+
+.dose-times-table th {
+  background-color: var(--prussian-blue);
+  color: var(--white);
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.dose-times-table th:first-child {
+  border-radius: var(--radius-md) 0 0 0;
+}
+
+.dose-times-table th:last-child {
+  border-radius: 0 var(--radius-md) 0 0;
+}
+
+.dose-times-table td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--alabaster-grey);
+  vertical-align: middle;
+}
+
+.dose-times-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dose-times-table tr:hover {
+  background-color: var(--bg-hover);
+}
+
+.time-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.time-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.time-input-wrapper input[type="time"] {
+  flex: 1;
+  min-width: 120px;
+}
+
+.meal-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* ============================================
+   STATUS BADGES
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: var(--success-green);
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: var(--error-red);
+}
+
+.badge-info {
+  background-color: #dbeafe;
+  color: var(--info-blue);
+}
+
+/* ============================================
+   DOSE HISTORY TABLE
+   ============================================ */
+.history-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--white);
+}
+
+.history-table thead {
+  background-color: var(--prussian-blue);
+  color: var(--white);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.history-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.history-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--alabaster-grey);
+  font-size: 14px;
+}
+
+.history-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.history-table tbody tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.history-table tbody tr:hover {
+  background-color: var(--bg-hover);
+  cursor: pointer;
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ============================================
+   FILTER PANEL
+   ============================================ */
+.filter-panel {
+  background-color: var(--bg-card);
+  border: 1px solid var(--alabaster-grey);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  display: none;
+}
+
+.filter-panel.active {
+  display: block;
+}
+
+.filter-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  display: block;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: var(--alabaster-grey);
+  border: 1px solid var(--alabaster-grey);
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-chip input[type="checkbox"] {
+  margin-right: var(--spacing-xs);
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--prussian-blue);
+}
+
+.filter-chip input[type="checkbox"]:checked + span {
+  font-weight: 600;
+  color: var(--prussian-blue);
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.date-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.date-range-inputs input[type="date"] {
+  flex: 1;
+  max-width: 200px;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================
+   REPEAT CONTROLS
+   ============================================ */
+.repeat-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--bg-hover);
+  border-radius: var(--radius-md);
+}
+
+.repeat-controls label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.custom-repeat-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.custom-repeat-wrapper input[type="number"] {
+  width: 70px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-secondary);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ============================================
+   ICONS & EMOJI HELPERS
+   ============================================ */
+.icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+  body {
+    padding: var(--spacing-md);
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .card {
+    padding: var(--spacing-md);
+  }
+
+  .dose-times-table,
+  .history-table {
+    font-size: 12px;
+  }
+
+  .dose-times-table th,
+  .dose-times-table td,
+  .history-table th,
+  .history-table td {
+    padding: 8px;
+  }
+
+  .time-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .pagination-container {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .filter-chips {
+    flex-direction: column;
+  }
+
+  .repeat-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .dose-times-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .history-table-wrapper {
+    overflow-x: scroll;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+  margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
