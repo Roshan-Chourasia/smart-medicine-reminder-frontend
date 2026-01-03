@@ -315,7 +315,7 @@ h3 {
   font-family: inherit;
   background-color: var(--white);
   color: var(--text-primary);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 .form-input:focus,
@@ -323,10 +323,18 @@ h3 {
   outline: none;
   border-color: var(--prussian-blue);
   box-shadow: 0 0 0 3px rgba(20, 33, 61, 0.1);
+  background-color: #fafbfc;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 .form-input[type="time"] {
   padding: 8px 10px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.form-input[type="time"]:focus {
+  background-color: #fafbfc;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 .form-helper {
