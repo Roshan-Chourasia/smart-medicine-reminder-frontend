@@ -455,6 +455,21 @@ function clearFilters() {
   renderCurrentPage();
 }
 
+// ---------------- NAVIGATION SCROLL FUNCTION ----------------
+function scrollToSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (section) {
+    const navbarHeight = 70; // Height of fixed navbar
+    const sectionPosition = section.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = sectionPosition - navbarHeight;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+}
+
 // On initial load, set up repeat controls, populate saved dose times and load logs
 initRepeatControls();
 loadSavedRepeatOptions();

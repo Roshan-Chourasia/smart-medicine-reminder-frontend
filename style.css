@@ -52,13 +52,115 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
-  padding: var(--spacing-lg);
+  padding: 0;
   min-height: 100vh;
+  padding-top: 70px; /* Space for fixed navbar */
+}
+
+/* ============================================
+   NAVIGATION BAR
+   ============================================ */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: var(--prussian-blue);
+  color: var(--white);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.navbar-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-icon img {
+  display: block;
+  object-fit: contain;
+}
+
+.navbar-title {
+  color: var(--white);
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: var(--spacing-lg);
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-menu li {
+  margin: 0;
+}
+
+.navbar-link {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.navbar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+}
+
+.navbar-link:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero-section {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  margin-bottom: var(--spacing-xl);
+}
+
+.hero-section h1 {
+  margin-bottom: var(--spacing-md);
+}
+
+.hero-section p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 400;
 }
 
 /* ============================================
@@ -92,7 +194,7 @@ h3 {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-md);
 }
 
 /* ============================================
@@ -553,11 +655,32 @@ h3 {
    ============================================ */
 @media (max-width: 768px) {
   body {
-    padding: var(--spacing-md);
+    padding-top: 60px; /* Adjust for smaller navbar */
+  }
+
+  .navbar {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .navbar-brand {
+    font-size: 16px;
+  }
+
+  .navbar-icon {
+    font-size: 20px;
+  }
+
+  .navbar-menu {
+    gap: var(--spacing-sm);
+  }
+
+  .navbar-link {
+    font-size: 14px;
+    padding: var(--spacing-xs);
   }
 
   .container {
-    padding: 0;
+    padding: var(--spacing-md);
   }
 
   h1 {

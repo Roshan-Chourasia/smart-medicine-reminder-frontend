@@ -15,11 +15,28 @@
 </head>
 
 <body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="navbar-icon"><img src="assets/icons/favicon.png" alt="SmartMed Reminder Logo" width="40px"></span>
+      <span class="navbar-title">SmartMed Reminder</span>
+    </div>
+    <ul class="navbar-menu">
+      <li><a href="#home" class="navbar-link" onclick="scrollToSection('home'); return false;">Home</a></li>
+      <li><a href="#set-time" class="navbar-link" onclick="scrollToSection('set-time'); return false;">Set Time</a></li>
+      <li><a href="#history" class="navbar-link" onclick="scrollToSection('history'); return false;">History</a></li>
+    </ul>
+  </nav>
+
   <div class="container">
-    <h1>💊 Smart Medicine Reminder System</h1>
+    <!-- Home Section (Top of page) -->
+    <section id="home" class="hero-section">
+      <h1>Smart Medicine Reminder System.</h1>
+      <p>Manage your medication schedule with ease.</p>
+    </section>
 
     <!-- Set Dose Times Card -->
-    <section class="card">
+    <section id="set-time" class="card">
       <div class="card-header">
         <h2 class="card-title">⏰ Set Dose Times</h2>
       </div>
@@ -177,7 +194,7 @@
     </section>
 
     <!-- Dose History Card -->
-    <section class="card">
+    <section id="history" class="card">
       <div class="card-header">
         <h2 class="card-title">📋 Dose History</h2>
         <button id="toggleFilterButton" onclick="toggleFilterPanel()" class="btn btn-secondary"><lord-icon
@@ -298,7 +315,7 @@
   <script>
     // Set your Render backend URL here after deployment
     // Format: https://your-backend.onrender.com
-    window.API_URL = "https://smart-medicine-reminder-backend.onrender.com";
+    window.API_URL = window.API_URL || "http://localhost:5000";
   </script>
   <script src="script.js"></script>
 </body>
