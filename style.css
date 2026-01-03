@@ -492,11 +492,29 @@ h3 {
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
-  display: none;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s ease-out, 
+              transform 0.3s ease-out, 
+              padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              margin 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              border-width 0.3s ease-out;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-width: 0;
 }
 
 .filter-panel.active {
-  display: block;
+  max-height: 800px;
+  opacity: 1;
+  transform: translateY(0);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-width: 1px;
 }
 
 .filter-section {
