@@ -1,9 +1,7 @@
-// API Configuration
-// After deployment: Update window.API_URL in index.html with your Render backend URL
-// Format: https://your-backend.onrender.com
-const BASE_URL = window.API_URL || "http://localhost:5000";
-
-const DEVICE_ID = "DEVICE_001";
+// Device ID will be fetched from linked patient
+let DEVICE_ID = null;
+// Selected device ID for caregivers (multi-device support)
+let selectedDeviceId = null;
 
 // ---------------- TOAST NOTIFICATIONS (Toastify) ----------------
 function showToast(message, type = "info") {
@@ -111,7 +109,15 @@ function initRepeatControls() {
 
 // ---------------- SAVE DOSE TIMES ----------------
 async function saveDoseTimes(showAlert = true, alertMessage = "Dose times saved successfully") {
+  // Get active device ID
+  const activeDeviceId = getActiveDeviceId();
+  if (!activeDeviceId) {
+    showToast("Please link a device to a patient first", "warning");
+    return;
+  }
+
   const data = {
+    deviceId: activeDeviceId,
     morning: {
       before: document.getElementById("morningBefore").value || null,
       after: document.getElementById("morningAfter").value || null
@@ -142,10 +148,9 @@ async function saveDoseTimes(showAlert = true, alertMessage = "Dose times saved 
   );
 
   try {
-    await fetch(`${BASE_URL}/api/dose-time`, {
+    await Auth.apiFetch('/api/dose-time', {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+      body: data
     });
 
     if (showAlert) {
@@ -153,34 +158,65 @@ async function saveDoseTimes(showAlert = true, alertMessage = "Dose times saved 
     }
   } catch (err) {
     console.error("Failed to save dose times", err);
-    showToast("Failed to save dose times", "error");
+    if (err.status === 401) {
+      Auth.redirectToLogin();
+    } else {
+      showToast("Failed to save dose times: " + (err.message || "Unknown error"), "error");
+    }
   }
 }
 
 // ---------------- LOAD SAVED DOSE TIMES INTO INPUTS ----------------
-function loadSavedDoseTimes() {
+async function loadSavedDoseTimes() {
+  // First try to load from backend if authenticated and device is linked
+  if (Auth.isAuthenticated()) {
+    const activeDeviceId = getActiveDeviceId();
+    if (activeDeviceId) {
+      try {
+        const data = await Auth.apiFetch(`/api/dose-time?deviceId=${activeDeviceId}`);
+        if (data && (data.morning || data.afternoon || data.night)) {
+          populateDoseTimeInputs(data);
+          updateSetTimeHeader();
+          return;
+        }
+      } catch (err) {
+        // Fall back to localStorage if API fails
+        console.warn("Failed to load dose times from API, using localStorage", err);
+      }
+    }
+  }
+
+  // Fallback to localStorage (only if it matches current device)
   const stored = localStorage.getItem("doseTimes");
-  if (!stored) return;
-
-  try {
-    const data = JSON.parse(stored);
-
-    if (data.morning) {
-      if (data.morning.before) document.getElementById("morningBefore").value = data.morning.before;
-      if (data.morning.after) document.getElementById("morningAfter").value = data.morning.after;
+  if (stored) {
+    try {
+      const data = JSON.parse(stored);
+      // Only use localStorage data if it matches the currently selected device
+      const activeDeviceId = getActiveDeviceId();
+      if (!activeDeviceId || data.deviceId === activeDeviceId) {
+        populateDoseTimeInputs(data);
+        updateSetTimeHeader();
+      }
+    } catch (e) {
+      console.error("Failed to load saved dose times", e);
     }
+  }
+}
 
-    if (data.afternoon) {
-      if (data.afternoon.before) document.getElementById("afternoonBefore").value = data.afternoon.before;
-      if (data.afternoon.after) document.getElementById("afternoonAfter").value = data.afternoon.after;
-    }
+function populateDoseTimeInputs(data) {
+  if (data.morning) {
+    if (data.morning.before) document.getElementById("morningBefore").value = data.morning.before;
+    if (data.morning.after) document.getElementById("morningAfter").value = data.morning.after;
+  }
 
-    if (data.night) {
-      if (data.night.before) document.getElementById("nightBefore").value = data.night.before;
-      if (data.night.after) document.getElementById("nightAfter").value = data.night.after;
-    }
-  } catch (e) {
-    console.error("Failed to load saved dose times", e);
+  if (data.afternoon) {
+    if (data.afternoon.before) document.getElementById("afternoonBefore").value = data.afternoon.before;
+    if (data.afternoon.after) document.getElementById("afternoonAfter").value = data.afternoon.after;
+  }
+
+  if (data.night) {
+    if (data.night.before) document.getElementById("nightBefore").value = data.night.before;
+    if (data.night.after) document.getElementById("nightAfter").value = data.night.after;
   }
 }
 
@@ -363,13 +399,31 @@ function goToNextPage() {
 }
 
 async function loadDoseLogs() {
-  const res = await fetch(`${BASE_URL}/api/dose-log?deviceId=${DEVICE_ID}`);
-  const logs = await res.json();
+  // Get active device ID
+  const activeDeviceId = getActiveDeviceId();
+  if (!activeDeviceId) {
+    allDoseLogs = [];
+    filteredDoseLogs = [];
+    renderCurrentPage();
+    return;
+  }
 
-  allDoseLogs = Array.isArray(logs) ? logs : [];
-  filteredDoseLogs = allDoseLogs.slice();
-  currentPage = 1;
-  renderCurrentPage();
+  try {
+    const logs = await Auth.apiFetch(`/api/dose-log?deviceId=${activeDeviceId}`);
+    allDoseLogs = Array.isArray(logs) ? logs : [];
+    filteredDoseLogs = allDoseLogs.slice();
+    currentPage = 1;
+    renderCurrentPage();
+  } catch (err) {
+    if (err.status === 401) {
+      Auth.redirectToLogin();
+    } else {
+      console.error("Failed to load dose logs", err);
+      allDoseLogs = [];
+      filteredDoseLogs = [];
+      renderCurrentPage();
+    }
+  }
 }
 
 // ---------------- FILTER CONTROLS FOR DOSE HISTORY ----------------
@@ -469,9 +523,319 @@ function scrollToSection(sectionId) {
     });
   }
 }
+// Expose globally for onclick handlers
+window.scrollToSection = scrollToSection;
 
-// On initial load, set up repeat controls, populate saved dose times and load logs
+// ---------------- ROLE-BASED UI ----------------
+function applyRoleUi() {
+  if (!window.Auth || !window.Auth.getStoredRole) return;
+  const role = window.Auth.getStoredRole() || "patient";
+  const isPatient = role === "patient";
+
+  // Navbar: Hide Patients and Devices links for patients
+  const navPatients = document.getElementById("navPatients");
+  const navDevices = document.getElementById("navDevices");
+  if (navPatients) navPatients.style.display = isPatient ? "none" : "";
+  if (navDevices) navDevices.style.display = isPatient ? "none" : "";
+
+  // Sections: Hide Patient Management and Device Management for patients
+  const patientsSection = document.getElementById("patients");
+  const devicesSection = document.getElementById("devices");
+  if (patientsSection) patientsSection.style.display = isPatient ? "none" : "";
+  if (devicesSection) devicesSection.style.display = isPatient ? "none" : "";
+
+  // Show Patient Info card for patients
+  const patientInfoSection = document.getElementById("patientInfo");
+  if (patientInfoSection) {
+    patientInfoSection.style.display = isPatient ? "" : "none";
+    if (isPatient) {
+      renderPatientInfo();
+    }
+  }
+
+  // Show device selector for caregivers only
+  const deviceSelectorSection = document.getElementById("deviceSelectorSection");
+  if (deviceSelectorSection) {
+    deviceSelectorSection.style.display = isPatient ? "none" : "";
+    if (!isPatient) {
+      populateDeviceSelector();
+      if (window.populateManualDeviceSelector) {
+        window.populateManualDeviceSelector();
+      }
+    }
+  }
+
+  // For patient role: Keep Set Time card enabled (patients can view their schedule)
+  // No need to disable inputs for patients - they should see their dose times
+}
+
+// Render patient info card (for patient role)
+function renderPatientInfo() {
+  const container = document.getElementById("patientInfoContent");
+  if (!container) return;
+
+  // Get patient's own record
+  const patient = window.allPatients && window.allPatients.length > 0 
+    ? window.allPatients[0] 
+    : null;
+
+  if (!patient) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">👤</div>
+        <div class="empty-state-text">No patient information found.</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Device status badge (Active/Inactive)
+  const deviceStatus = patient.deviceId 
+    ? `<span class="badge ${patient.deviceActive ? 'badge-success' : 'badge-info'}">${patient.deviceActive ? 'Device Active' : 'Device Inactive'}</span>`
+    : '<span class="badge badge-info">No Device Linked</span>';
+
+  // Online/Offline status badge (only if device is linked and active)
+  let onlineStatusBadge = '';
+  if (patient.deviceId && patient.deviceActive) {
+    const isOnline = patient.deviceOnline === true;
+    onlineStatusBadge = `<span class="badge ${isOnline ? 'badge-success' : 'badge-error'}" style="margin-left: 8px;" title="${isOnline ? 'Device is online' : 'Device is offline'}">
+      ${isOnline ? '🟢 Online' : '🔴 Offline'}
+    </span>`;
+  }
+
+  container.innerHTML = `
+    <div class="patient-card" style="border: 1px solid var(--alabaster-grey); border-radius: var(--radius-md); padding: var(--spacing-md); background: var(--bg-card);">
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--spacing-sm);">
+        <div>
+          <h3 style="margin: 0 0 var(--spacing-xs) 0; color: var(--prussian-blue);">${escapeHtml(patient.name || 'Unnamed')}</h3>
+          ${patient.age ? `<p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Age: ${patient.age}</p>` : ''}
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          ${deviceStatus}
+          ${onlineStatusBadge}
+        </div>
+      </div>
+      ${patient.caregiverName ? `<p style="margin: var(--spacing-xs) 0; color: var(--text-secondary); font-size: 14px;"><strong>Caregiver:</strong> ${escapeHtml(patient.caregiverName)}</p>` : ''}
+      ${patient.caregiverPhone ? `<p style="margin: var(--spacing-xs) 0; color: var(--text-secondary); font-size: 14px;"><strong>Caregiver Phone:</strong> ${escapeHtml(patient.caregiverPhone)}</p>` : ''}
+      ${patient.deviceId ? `<p style="margin: var(--spacing-xs) 0; color: var(--text-secondary); font-size: 14px;"><strong>Device ID:</strong> <code style="background: var(--alabaster-grey); padding: 2px 6px; border-radius: 4px;">${escapeHtml(patient.deviceId)}</code></p>` : '<p style="margin: var(--spacing-xs) 0; color: var(--text-secondary); font-size: 14px;">No device linked yet. Contact your caregiver to link a device.</p>'}
+      ${onlineStatusBadge ? `<p style="margin: var(--spacing-xs) 0; color: var(--text-secondary); font-size: 14px;"><strong>Device Status:</strong> ${onlineStatusBadge}</p>` : ''}
+    </div>
+  `;
+}
+
+// Helper function for HTML escaping (if not already available)
+function escapeHtml(text) {
+  if (typeof text === 'undefined' || text === null) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Expose renderPatientInfo globally so it can be called from patient.js
+window.renderPatientInfo = renderPatientInfo;
+
+// ---------------- DEVICE SELECTOR (for caregivers) ----------------
+function populateDeviceSelector() {
+  const selector = document.getElementById("deviceSelector");
+  if (!selector) return;
+
+  // Clear existing options except the first placeholder
+  selector.innerHTML = '<option value="">Select a patient...</option>';
+
+  if (!window.allPatients || window.allPatients.length === 0) {
+    selector.innerHTML += '<option value="" disabled>No patients with devices found</option>';
+    window.selectedDeviceId = null;
+    localStorage.removeItem("selectedDeviceId");
+    return;
+  }
+
+  // Add options for each patient with a linked device
+  const patientsWithDevices = window.allPatients.filter(p => p.deviceId && p.deviceActive);
+  
+  if (patientsWithDevices.length === 0) {
+    selector.innerHTML += '<option value="" disabled>No active devices found</option>';
+    window.selectedDeviceId = null;
+    localStorage.removeItem("selectedDeviceId");
+    return;
+  }
+
+  patientsWithDevices.forEach(patient => {
+    const option = document.createElement("option");
+    option.value = patient.deviceId;
+    option.textContent = `${patient.name || 'Unnamed'} – ${patient.deviceId}`;
+    selector.appendChild(option);
+  });
+
+  // Restore saved selection or auto-select first device
+  const savedDeviceId = localStorage.getItem("selectedDeviceId");
+  if (savedDeviceId && patientsWithDevices.find(p => p.deviceId === savedDeviceId)) {
+    // Restore saved selection if it still exists
+    window.selectedDeviceId = savedDeviceId;
+    selector.value = savedDeviceId;
+  } else if (!window.selectedDeviceId && patientsWithDevices.length > 0) {
+    // Auto-select first device if no selection
+    window.selectedDeviceId = patientsWithDevices[0].deviceId;
+    selector.value = window.selectedDeviceId;
+    localStorage.setItem("selectedDeviceId", window.selectedDeviceId);
+  } else if (window.selectedDeviceId) {
+    // Check if current selection is still valid
+    const stillValid = patientsWithDevices.find(p => p.deviceId === window.selectedDeviceId);
+    if (stillValid) {
+      selector.value = window.selectedDeviceId;
+    } else {
+      // Current selection is invalid, reset to first
+      window.selectedDeviceId = patientsWithDevices[0].deviceId;
+      selector.value = window.selectedDeviceId;
+      localStorage.setItem("selectedDeviceId", window.selectedDeviceId);
+    }
+  }
+}
+
+function handleDeviceSelectionChange() {
+  const selector = document.getElementById("deviceSelector");
+  if (!selector) return;
+
+  const newDeviceId = selector.value || null;
+  window.selectedDeviceId = newDeviceId;
+
+  // Keep manual device dropdown in sync (caregiver device management)
+  const manualSelector = document.getElementById("manualDeviceSelector");
+  if (manualSelector) {
+    manualSelector.value = newDeviceId || "";
+  }
+  
+  // Persist selection in localStorage
+  if (newDeviceId) {
+    localStorage.setItem("selectedDeviceId", newDeviceId);
+  } else {
+    localStorage.removeItem("selectedDeviceId");
+  }
+
+  // Reload dose times and history for the selected device
+  if (newDeviceId) {
+    loadSavedDoseTimes();
+    loadDoseLogs();
+    updateSetTimeHeader();
+  } else {
+    // Clear if no device selected
+    allDoseLogs = [];
+    filteredDoseLogs = [];
+    renderCurrentPage();
+    updateSetTimeHeader();
+  }
+}
+
+// Update Set Time card header to show selected device
+function updateSetTimeHeader() {
+  const header = document.querySelector("#set-time .card-title");
+  if (!header) return;
+  
+  const deviceId = getActiveDeviceId();
+  if (deviceId && window.allPatients) {
+    const patient = window.allPatients.find(p => p.deviceId === deviceId);
+    if (patient) {
+      const originalText = header.innerHTML;
+      // Check if we already added device info
+      if (!originalText.includes("device-info")) {
+        const deviceInfo = document.createElement("span");
+        deviceInfo.className = "device-info";
+        deviceInfo.style.cssText = "font-size: 0.85em; font-weight: normal; color: var(--text-secondary); margin-left: 10px;";
+        deviceInfo.textContent = `(${patient.name || 'Unnamed'} – ${deviceId})`;
+        header.appendChild(deviceInfo);
+      } else {
+        // Update existing device info
+        const existingInfo = header.querySelector(".device-info");
+        if (existingInfo) {
+          existingInfo.textContent = `(${patient.name || 'Unnamed'} – ${deviceId})`;
+        }
+      }
+    }
+  } else {
+    // Remove device info if no device selected
+    const deviceInfo = header.querySelector(".device-info");
+    if (deviceInfo) {
+      deviceInfo.remove();
+    }
+  }
+}
+
+// Expose globally
+window.populateDeviceSelector = populateDeviceSelector;
+window.handleDeviceSelectionChange = handleDeviceSelectionChange;
+window.updateSetTimeHeader = updateSetTimeHeader;
+
+// ---------------- AUTH LINK (LOGIN/LOGOUT) ----------------
+function initAuthLink() {
+  const link = document.getElementById("authLink");
+  if (!link) return;
+  
+  // Wait for Auth to be available
+  if (!window.Auth) {
+    setTimeout(initAuthLink, 100);
+    return;
+  }
+
+  if (window.Auth.isAuthenticated()) {
+    const name = window.Auth.getStoredName ? window.Auth.getStoredName() : null;
+    const email = window.Auth.getStoredEmail ? window.Auth.getStoredEmail() : null;
+    const label = name || email;
+    link.textContent = label ? `Logout (${label})` : "Logout";
+    link.href = "#";
+    link.onclick = (e) => {
+      e.preventDefault();
+      window.Auth.logoutAndRedirect();
+    };
+  } else {
+    link.textContent = "Login";
+    link.href = "login.html?returnTo=index.html";
+    link.onclick = null;
+  }
+}
+
+// On initial load
 initRepeatControls();
 loadSavedRepeatOptions();
 loadSavedDoseTimes();
-loadDoseLogs();
+
+// Apply role-based UI slightly after Auth is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      initAuthLink();
+      applyRoleUi();
+    }, 100);
+  });
+} else {
+  setTimeout(() => {
+    initAuthLink();
+    applyRoleUi();
+  }, 100);
+}
+
+// Load patients first, then logs (so we can get deviceId)
+if (Auth.isAuthenticated()) {
+  // Restore selected device from localStorage (for caregivers)
+  const savedDeviceId = localStorage.getItem("selectedDeviceId");
+  if (savedDeviceId) {
+    window.selectedDeviceId = savedDeviceId;
+  }
+  
+  loadPatients().then(() => {
+    loadDoseLogs();
+    // Re-apply role UI after patients are loaded (to show patient info card)
+    setTimeout(() => {
+      applyRoleUi();
+      updateSetTimeHeader();
+    }, 100);
+  });
+
+  // Periodically refresh patient data to update online/offline status (every 30 seconds)
+  setInterval(() => {
+    if (Auth.isAuthenticated()) {
+      loadPatients();
+    }
+  }, 30000);
+} else {
+  // If not authenticated, still try to load logs (for backward compatibility)
+  loadDoseLogs();
+}

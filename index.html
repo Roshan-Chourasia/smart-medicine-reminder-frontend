@@ -23,8 +23,11 @@
     </div>
     <ul class="navbar-menu">
       <li><a href="#home" class="navbar-link" onclick="scrollToSection('home'); return false;">Home</a></li>
+      <li id="navPatients" class="navbar-link"><a href="#patients" class="navbar-link" onclick="scrollToSection('patients'); return false;">Patients</a></li>
+      <li id="navDevices" class="navbar-link"><a href="#devices" class="navbar-link" onclick="scrollToSection('devices'); return false;">Devices</a></li>
       <li><a href="#set-time" class="navbar-link" onclick="scrollToSection('set-time'); return false;">Set Time</a></li>
       <li><a href="#history" class="navbar-link" onclick="scrollToSection('history'); return false;">History</a></li>
+      <li><a id="authLink" href="login.html" class="navbar-link">Login</a></li>
     </ul>
   </nav>
 
@@ -194,6 +197,71 @@
       </div>
     </section>
 
+    <!-- Patient Info Card (for patient role) -->
+    <section id="patientInfo" class="card" style="display: none;">
+      <div class="card-header">
+        <h2 class="card-title"><img src="assets/icons/medicine.png" alt="Info Icon" width="30px"> Your Information</h2>
+      </div>
+      <div id="patientInfoContent" class="patients-list">
+        <!-- Patient info will be loaded here -->
+      </div>
+    </section>
+
+    <!-- Patient Management Card (for caregiver role) -->
+    <section id="patients" class="card">
+      <div class="card-header">
+        <h2 class="card-title"><img src="assets/icons/medicine.png" alt="Patient Icon" width="30px"> Patient Management</h2>
+        <button onclick="showCreatePatientModal()" class="btn btn-primary">
+          <lord-icon src="https://cdn.lordicon.com/vwzukuhn.json" trigger="hover" stroke="bold"
+            colors="primary:#ffffff" style="width:20px;height:20px">
+          </lord-icon> Add Patient
+        </button>
+      </div>
+
+      <div id="patientsList" class="patients-list">
+        <!-- Patients will be loaded here -->
+        <div class="empty-state">
+          <div class="empty-state-icon">👤</div>
+          <div class="empty-state-text">No patients found. Create your first patient to get started.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Device Management Card (for caregiver role) -->
+    <section id="devices" class="card">
+      <div class="card-header">
+        <h2 class="card-title">🔌 Device Management</h2>
+      </div>
+
+      <div id="devicesList" class="devices-list">
+        <!-- Manual control for caregivers -->
+        <div id="manualDeviceControls" style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="manualDeviceSelector">Device</label>
+            <select id="manualDeviceSelector" class="form-select">
+              <option value="">Select a device...</option>
+            </select>
+            <span class="form-helper">Choose which ESP32 device to open/close.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="manualSlotSelector">Slot</label>
+            <select id="manualSlotSelector" class="form-select">
+              <option value="morning" selected>Morning</option>
+              <option value="afternoon">Afternoon</option>
+              <option value="night">Night</option>
+            </select>
+            <span class="form-helper">Opens/closes the selected compartment.</span>
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+            <button type="button" onclick="sendManualCommand('open')" class="btn btn-primary">Open</button>
+            <button type="button" onclick="sendManualCommand('close')" class="btn btn-secondary">Close</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Dose History Card -->
     <section id="history" class="card">
       <div class="card-header">
@@ -206,6 +274,15 @@
       </div>
 
       <div id="filterPanel" class="filter-panel">
+        <div id="deviceSelectorSection" class="filter-section" style="display: none;">
+          <label class="filter-label">Patient / Device</label>
+          <select id="deviceSelector" class="form-select" onchange="handleDeviceSelectionChange()">
+            <option value="">Select a patient...</option>
+            <!-- Options will be populated by JavaScript -->
+          </select>
+          <span class="form-helper">Select which patient's device to manage</span>
+        </div>
+
         <div class="filter-section">
           <label class="filter-label">Date Range</label>
           <div class="date-range-inputs">
@@ -316,8 +393,77 @@
   <script>
     // Set your Render backend URL here after deployment
     // Format: https://your-backend.onrender.com
-    window.API_URL = "https://smart-medicine-reminder-backend.onrender.com";
+    window.API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+  ? "http://localhost:5000" 
+  : "https://smart-medicine-reminder-backend.onrender.com";
   </script>
+  <!-- Create Patient Modal -->
+  <div id="createPatientModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="card-header">
+        <h2 class="card-title">Add New Patient</h2>
+        <button onclick="closeCreatePatientModal()" class="btn btn-secondary" style="padding: 8px 12px;">✕</button>
+      </div>
+      <form id="createPatientForm" onsubmit="handleCreatePatient(event)">
+        <div class="form-group">
+          <label class="form-label" for="patientName">Name *</label>
+          <input type="text" id="patientName" class="form-input" placeholder="Patient name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="patientAge">Age</label>
+          <input type="number" id="patientAge" class="form-input" placeholder="Age" min="0" max="150">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="caregiverName">Caregiver Name</label>
+          <input type="text" id="caregiverName" class="form-input" placeholder="Caregiver name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="caregiverPhone">Caregiver Phone</label>
+          <input type="tel" id="caregiverPhone" class="form-input" placeholder="Phone number">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="caregiverEmail">Caregiver Email</label>
+          <input type="email" id="caregiverEmail" class="form-input" placeholder="caregiver@example.com">
+          <span class="form-helper">Used to email alerts for missed doses.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="patientEmail">Patient Email *</label>
+          <input type="email" id="patientEmail" class="form-input" placeholder="patient@example.com" required>
+          <span class="form-helper">Required to link the patient account for login and personalized access.</span>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" onclick="closeCreatePatientModal()" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Patient</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Link Device Modal -->
+  <div id="linkDeviceModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="card-header">
+        <h2 class="card-title">Link Device</h2>
+        <button onclick="closeLinkDeviceModal()" class="btn btn-secondary" style="padding: 8px 12px;">✕</button>
+      </div>
+      <form id="linkDeviceForm" onsubmit="handleLinkDevice(event)">
+        <input type="hidden" id="linkPatientId">
+        <div class="form-group">
+          <label class="form-label" for="deviceIdInput">Device ID *</label>
+          <input type="text" id="deviceIdInput" class="form-input" placeholder="e.g., DEVICE_001" required>
+          <span class="form-helper">Enter the device ID from your ESP32</span>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" onclick="closeLinkDeviceModal()" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Link Device</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="patient.js"></script>
+  <script src="device.js"></script>
   <script src="script.js"></script>
 </body>
 

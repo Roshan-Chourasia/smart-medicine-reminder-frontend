@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login • SmartMed Reminder</title>
+  <link rel="icon" type="image/png" href="assets/icons/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="navbar-icon"><img src="assets/icons/favicon.png" alt="SmartMed Reminder Logo" width="40px"></span>
+      <span class="navbar-title">SmartMed Reminder</span>
+    </div>
+    <ul class="navbar-menu">
+      <li><a class="navbar-link" href="index.html">Home</a></li>
+      <li><a class="navbar-link" href="signup.html">Signup</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <section class="card" style="max-width: 520px; margin: 0 auto;">
+      <div class="card-header">
+        <h2 class="card-title">Login</h2>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password"
+          required>
+      </div>
+
+      <div style="display:flex; gap: 10px; align-items:center; justify-content: space-between;">
+        <button id="loginBtn" class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">Login</button>
+      </div>
+
+      <p class="form-helper" style="margin-top: 12px;">
+        Don't have an account? <a href="signup.html">Create one</a>.
+      </p>
+    </section>
+  </div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    // Keep this aligned with your backend deployment (Render/local)
+    window.API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+  ? "http://localhost:5000" 
+  : "https://smart-medicine-reminder-backend.onrender.com";
+  </script>
+  <script src="auth.js"></script>
+  <script src="login.js"></script>
+</body>
+
+</html>
+

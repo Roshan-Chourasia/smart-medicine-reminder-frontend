@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup • SmartMed Reminder</title>
+  <link rel="icon" type="image/png" href="assets/icons/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="navbar-icon"><img src="assets/icons/favicon.png" alt="SmartMed Reminder Logo" width="40px"></span>
+      <span class="navbar-title">SmartMed Reminder</span>
+    </div>
+    <ul class="navbar-menu">
+      <li><a class="navbar-link" href="index.html">Home</a></li>
+      <li><a class="navbar-link" href="login.html">Login</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <section class="card" style="max-width: 560px; margin: 0 auto;">
+      <div class="card-header">
+        <h2 class="card-title">Create account</h2>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="name">Name</label>
+        <input class="form-input" type="text" id="name" placeholder="Your name" autocomplete="name" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" placeholder="Create a password" autocomplete="new-password"
+          required>
+        <span class="form-helper">Use something you won’t forget. (We’ll improve password rules later.)</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <div style="display:flex; gap: 12px; flex-wrap: wrap;">
+          <label class="filter-chip" style="user-select:none;">
+            <input type="radio" name="role" value="patient" checked>
+            <span>Patient</span>
+          </label>
+          <label class="filter-chip" style="user-select:none;">
+            <input type="radio" name="role" value="caregiver">
+            <span>Caregiver / Self-managed</span>
+          </label>
+        </div>
+        <span class="form-helper">Role affects what you’ll be able to do later (backend RBAC comes next).</span>
+      </div>
+
+      <button id="signupBtn" class="btn btn-primary" style="width: 100%;" onclick="handleSignup()">Create account</button>
+
+      <p class="form-helper" style="margin-top: 12px;">
+        Already have an account? <a href="login.html">Login</a>.
+      </p>
+    </section>
+  </div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    window.API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+  ? "http://localhost:5000" 
+  : "https://smart-medicine-reminder-backend.onrender.com";
+  </script>
+  <script src="auth.js"></script>
+  <script src="signup.js"></script>
+</body>
+
+</html>
+
