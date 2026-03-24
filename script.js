@@ -274,6 +274,7 @@ function formatTimingWithMeal(meal, timing) {
 let allDoseLogs = [];
 let filteredDoseLogs = [];
 let currentPage = 1;
+let doseHistoryEmptyMessage = "No dose history found for selected filters";
 
 function getStatusBadge(status) {
   if (status?.toLowerCase() === "taken") {
@@ -308,7 +309,7 @@ function renderDoseLogs(logs) {
     row.innerHTML = `
       <td colspan="5" class="empty-state">
         <div class="empty-state-icon">📭</div>
-        <div class="empty-state-text">No dose history found for selected filters</div>
+        <div class="empty-state-text">${doseHistoryEmptyMessage}</div>
       </td>
     `;
     tbody.appendChild(row);
@@ -399,7 +400,40 @@ function goToNextPage() {
 }
 
 async function loadDoseLogs() {
-  // Get active device ID
+  const role = (window.Auth && window.Auth.getStoredRole && window.Auth.getStoredRole()) || "patient";
+
+  // Patient view: fetch own history directly (no device selector dependency)
+  if (role === "patient" && Auth.isAuthenticated()) {
+    const myPatient = Array.isArray(window.allPatients) && window.allPatients.length > 0
+      ? window.allPatients[0]
+      : null;
+    const hasActiveDevice = Boolean(myPatient && myPatient.deviceId && myPatient.deviceActive);
+    doseHistoryEmptyMessage = hasActiveDevice
+      ? "No dose history found yet."
+      : "No linked active device found. Ask your caregiver to link and enable your device.";
+
+    try {
+      const logs = await Auth.apiFetch("/api/dose-log/my");
+      allDoseLogs = Array.isArray(logs) ? logs : [];
+      filteredDoseLogs = allDoseLogs.slice();
+      currentPage = 1;
+      renderCurrentPage();
+      return;
+    } catch (err) {
+      if (err.status === 401) {
+        Auth.redirectToLogin();
+      } else {
+        console.error("Failed to load patient dose logs", err);
+        allDoseLogs = [];
+        filteredDoseLogs = [];
+        renderCurrentPage();
+      }
+      return;
+    }
+  }
+
+  // Caregiver (or fallback): use selected/active device ID
+  doseHistoryEmptyMessage = "No dose history found for selected filters";
   const activeDeviceId = getActiveDeviceId();
   if (!activeDeviceId) {
     allDoseLogs = [];
