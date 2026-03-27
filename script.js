@@ -3,6 +3,14 @@ let DEVICE_ID = null;
 // Selected device ID for caregivers (multi-device support)
 let selectedDeviceId = null;
 
+function getCurrentRole() {
+  return (window.Auth && window.Auth.getStoredRole && window.Auth.getStoredRole()) || "patient";
+}
+
+function isPatientRole() {
+  return getCurrentRole() === "patient";
+}
+
 // ---------------- TOAST NOTIFICATIONS (Toastify) ----------------
 function showToast(message, type = "info") {
   // type: "success", "error", "info"
@@ -109,6 +117,11 @@ function initRepeatControls() {
 
 // ---------------- SAVE DOSE TIMES ----------------
 async function saveDoseTimes(showAlert = true, alertMessage = "Dose times saved successfully") {
+  if (isPatientRole()) {
+    showToast("Only caregivers can change dose times", "warning");
+    return;
+  }
+
   // Get active device ID
   const activeDeviceId = getActiveDeviceId();
   if (!activeDeviceId) {
@@ -222,6 +235,11 @@ function populateDoseTimeInputs(data) {
 
 // ---------------- UPDATE / DELETE SINGLE DOSE TIME ----------------
 function updateDoseTime(meal, timing) {
+  if (isPatientRole()) {
+    showToast("Only caregivers can change dose times", "warning");
+    return;
+  }
+
   const id = `${meal}${timing.charAt(0).toUpperCase()}${timing.slice(1)}`; // e.g. morningBefore
   const input = document.getElementById(id);
   if (!input) return;
@@ -245,6 +263,11 @@ function updateDoseTime(meal, timing) {
 }
 
 function deleteDoseTime(meal, timing) {
+  if (isPatientRole()) {
+    showToast("Only caregivers can change dose times", "warning");
+    return;
+  }
+
   const id = `${meal}${timing.charAt(0).toUpperCase()}${timing.slice(1)}`; // e.g. morningBefore
   const input = document.getElementById(id);
   if (input) {
@@ -599,8 +622,33 @@ function applyRoleUi() {
     }
   }
 
-  // For patient role: Keep Set Time card enabled (patients can view their schedule)
-  // No need to disable inputs for patients - they should see their dose times
+  toggleSetTimeAccess(isPatient);
+}
+
+function toggleSetTimeAccess(isPatient) {
+  const setTimeSection = document.getElementById("set-time");
+  if (!setTimeSection) return;
+
+  const controls = setTimeSection.querySelectorAll("input, select, button, textarea");
+  controls.forEach((control) => {
+    const tag = control.tagName.toLowerCase();
+
+    if (tag === "input" && control.type === "time") {
+      control.readOnly = isPatient;
+      control.disabled = isPatient;
+      return;
+    }
+
+    control.disabled = isPatient;
+  });
+
+  if (isPatient) {
+    setTimeSection.setAttribute("aria-disabled", "true");
+    setTimeSection.title = "Only caregivers can edit dose times";
+  } else {
+    setTimeSection.removeAttribute("aria-disabled");
+    setTimeSection.removeAttribute("title");
+  }
 }
 
 // Render patient info card (for patient role)
